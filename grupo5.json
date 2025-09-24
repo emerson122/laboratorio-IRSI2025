@@ -1,101 +1,98 @@
 {
-  "case_name": "Exfiltration_MassiveTransfer_FINANCE_DB",
-  "correlation_object": {
-    "phase": "Exfiltration & Impact",
-    "origin_host": "FINANCE-DB",
-    "origin_ip": "10.10.10.5",
-    "user": "dbadmin@empresa.local",
-    "session_source_ip": "10.10.1.9"
-  },
-  "iocs": {
-    "dst_ip": "85.206.172.132",
-    "dst_domain": "fileshare.upload",
-    "tools": [
-      "7zip.exe"
+  "Paquete 6": {
+    "Titulo_de_alerta": "Actividad sospechosa post-exfil: intento de cifrado de archivos y modificación de Shadow Copies",
+    "Fase": "Exfiltration & Impact",
+    "IP_atacante_C2": "198.24.79.245",
+    "Hosts_afectados": [
+      "FILESRV-03 (10.10.3.17)",
+      "USER-DEV-21 (10.10.21.77)"
     ],
-    "files": [
-      "C:\\Backups\\finance_2025-09-23.zip"
+    "Usuario_implicado": "local admin (movida lateral con privilegios elevados)",
+    "Resumen": "Tras la fase de exfiltración, se detecta actividad que corresponde a la fase de impacto: eliminación de mecanismos de recuperación (shadow copies), ejecución de cifrado masivo de archivos, modificación de extensiones, y creación de notas de rescate en sistemas comprometidos. Además, se observan conexiones de mando y control activas hacia un servidor externo en 198.24.79.245 sobre puerto no estándar (4444).",
+    "Evidencia": {
+      "EDR_ProcessCreate": [
+        "2025-09-24T03:50:10Z - ProcessCreate - C:\\Windows\\System32\\cmd.exe /c vssadmin delete shadows /all /quiet",
+        "2025-09-24T03:50:25Z - ProcessCreate - C:\\Windows\\System32\\wbadmin.exe DELETE SYSTEMSTATEBACKUP -quiet",
+        "2025-09-24T03:50:45Z - ProcessCreate - C:\\Users\\localadmin\\AppData\\Roaming\\encryptor.exe --target C:\\Shares --ext .locked"
+      ],
+      "File_Modifications": [
+        "2025-09-24T03:51:00Z - Cambio de extensión: finance_q1_2025.xlsx -> finance_q1_2025.xlsx.locked",
+        "2025-09-24T03:51:03Z - Cambio de extensión: payroll_2025.csv -> payroll_2025.csv.locked",
+        "2025-09-24T03:51:10Z - Creación de archivo de nota de rescate: C:\\Shares\\README_RECOVER.txt",
+        "2025-09-24T03:51:30Z - Creación masiva de notas en directorios de usuario (ej: C:\\Users\\Public\\Documents\\README_RECOVER.txt)",
+        "2025-09-24T03:51:45Z - Escritura de ficheros de log temporales por encryptor.exe en C:\\Users\\localadmin\\AppData\\Local\\Temp\\enc_logs.tmp"
+      ],
+      "Backup_Logs": [
+        "2025-09-24T03:50:20Z - Evento: eliminación total de shadow copies confirmada",
+        "2025-09-24T03:50:35Z - Fallo: tarea de backup incremental no puede encontrar snapshots previos",
+        "2025-09-24T03:52:05Z - Error: servicio de backup interrumpido por acceso denegado a directorios bloqueados",
+        "2025-09-24T03:52:15Z - Alerta: política de retención de copias violada; no existen snapshots disponibles"
+      ],
+      "Network_Connections": [
+        "2025-09-24T03:49:50Z - Conexión establecida desde 198.24.79.245 -> 10.10.3.17:4444 (C2 sospechoso)",
+        "2025-09-24T03:50:30Z - Persistencia de flujo con transferencia de ~250KB de datos cifrados (posibles claves de sesión o logs de progreso del cifrado)",
+        "2025-09-24T03:52:00Z - Segundo canal abierto: 198.24.79.245 -> 10.10.21.77:4444",
+        "2025-09-24T03:52:45Z - Comunicación con headers personalizados HTTP-over-TCP (encapsulación no estándar detectada por DPI)",
+        "2025-09-24T03:53:10Z - Transferencia de archivo comprimido con lista parcial de ficheros encriptados (nombre sospechoso: enc_index_2025.zip)"
+      ],
+      "Registry_Changes": [
+        "2025-09-24T03:50:40Z - HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\ added value: 'encryptor' -> C:\\Users\\localadmin\\AppData\\Roaming\\encryptor.exe",
+        "2025-09-24T03:50:55Z - HKLM\\SYSTEM\\CurrentControlSet\\Control\\SafeBoot\\Minimal\\ service modification attempt",
+        "2025-09-24T03:51:05Z - HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\Hidden set to 0 (ocultación de ficheros)"
+      ],
+      "Persistence_Techniques": [
+        "Creación de Scheduled Task: 'EncryptorUpdate' ejecutándose cada inicio de sesión",
+        "Modificación de servicios críticos con privilegios SYSTEM",
+        "Copia del binario encryptor.exe en directorio System32"
+      ]
+    },
+    "Timeline": [
+      "03:45 — Actividad lateral desde otra máquina con escalada de privilegios a local admin",
+      "03:49 — Conexiones de mando y control establecidas hacia 198.24.79.245 (puerto 4444)",
+      "03:50 — Ejecución de comandos para eliminar shadow copies y backups locales",
+      "03:50:25 — Ejecución de wbadmin para borrar backups de estado del sistema",
+      "03:50:45 — Lanzamiento del binario encryptor.exe",
+      "03:51 — Cambio masivo de extensiones a .locked en múltiples directorios de red",
+      "03:51:10 — Creación de nota README_RECOVER.txt en compartidos de archivos",
+      "03:51:30 — Replicación de notas de rescate en carpetas de usuarios",
+      "03:52 — Fallos de backup reportados por falta de snapshots",
+      "03:52:45 — Conexión secundaria desde USER-DEV-21 a C2 198.24.79.245",
+      "03:53 — Transferencia de evidencia de cifrado hacia servidor atacante",
+      "03:54 — Intentos de establecer persistencia vía registry y scheduled tasks"
     ],
-    "file_types": [
-      ".csv",
-      ".sql",
-      ".zip"
-    ]
-  },
-  "events": [
-    {
-      "event_id": "edr_file_zip_1",
-      "event_time_utc": "2025-09-24T00:50:00Z",
-      "source": "EDR",
-      "event_type": "ProcessCreate",
-      "host": "FINANCE-DB",
-      "host_ip": "10.10.10.5",
-      "user": "dbadmin@empresa.local",
-      "process": {
-        "name": "7zip.exe",
-        "cmdline": "7zip a C:\\Backups\\finance_2025-09-23.zip *.sql *.csv"
-      },
-      "notes": "Compresión de múltiples ficheros financieros en un solo archivo ZIP de gran tamaño."
+    "Acciones_en_StellarCyber": {
+      "Alertas_generadas": [
+        "EDR: ejecución de vssadmin y wbadmin con parámetros de borrado",
+        "File monitoring: cambios masivos de extensión a .locked",
+        "Network: conexiones salientes a IP no categorizada en puerto 4444",
+        "Backup system: error crítico de restauración",
+        "IOC match: IP atacante 198.24.79.245 reportada como C2 activo en lista TI"
+      ],
+      "Response_Automation": [
+        "Alertas priorizadas automáticamente como CRÍTICAS",
+        "Trigger de regla automática para bloqueo de procesos encryptor.exe",
+        "Generación de caso en Case Management vinculado a los dos hosts afectados"
+      ],
+      "Post_Mortem_preparacion": [
+        "Registro de todos los ficheros modificados por extensión .locked",
+        "Listados de directorios afectados exportados a repositorio central",
+        "Asociación de hashes SHA256 de encryptor.exe y README_RECOVER.txt para uso en TI futura"
+      ]
     },
-    {
-      "event_id": "proxy_https_exfil_1",
-      "event_time_utc": "2025-09-24T01:12:10Z",
-      "source": "Proxy",
-      "event_type": "OutboundHTTPS",
-      "host": "FINANCE-DB",
-      "host_ip": "10.10.10.5",
-      "user": "dbadmin@empresa.local",
-      "network": {
-        "dst_ip": "85.206.172.132",
-        "dst_port": 443,
-        "protocol": "TLS",
-        "bytes_sent": 2400000,
-        "sni": "fileshare.upload",
-        "host_header": "fileshare.upload"
-      },
-      "notes": "Transferencia inicial de archivo comprimido detectada hacia host externo desconocido."
-    },
-    {
-      "event_id": "network_flow_1",
-      "event_time_utc": "2025-09-24T01:40:00Z",
-      "source": "Firewall",
-      "event_type": "DataTransfer",
-      "host": "FINANCE-DB",
-      "host_ip": "10.10.10.5",
-      "user": "dbadmin@empresa.local",
-      "network": {
-        "dst_ip": "85.206.172.132",
-        "protocol": "TLS",
-        "duration": "28m",
-        "bytes_sent": 2200000000
-      },
-      "notes": "Transferencia completada ~2.2GB de datos financieros sensibles."
+    "IOCs": {
+      "IP_C2": "198.24.79.245",
+      "Comandos_observados": [
+        "vssadmin delete shadows /all /quiet",
+        "wbadmin DELETE SYSTEMSTATEBACKUP -quiet"
+      ],
+      "Binario_malicioso": "encryptor.exe",
+      "Extensiones_encriptadas": ".locked",
+      "Nota_de_rescate": "README_RECOVER.txt",
+      "Archivo_transferido": "enc_index_2025.zip",
+      "Hashes": {
+        "encryptor.exe": "sha256:7f3a2d5f2a49e0192e8cf7f6ac10d921eaf12bb7f03c8e8d4c8b482ff56a9d21",
+        "README_RECOVER.txt": "sha256:98a7b31c21cd19db8adf2209f7ce233ba2f8946c9cbd773a09c89472118de888"
+      }
     }
-  ],
-  "timeline_summary": [
-    {
-      "time": "2025-09-24T00:50:00Z",
-      "event": "Compresión de backups en finance_2025-09-23.zip."
-    },
-    {
-      "time": "2025-09-24T01:12:10Z",
-      "event": "Transferencia HTTPS iniciada desde FINANCE-DB hacia 85.206.172.132."
-    },
-    {
-      "time": "2025-09-24T01:40:00Z",
-      "event": "Exfiltración completa (~2.2GB) confirmada."
-    }
-  ],
-  "analysis": {
-    "summary": "Confirmada la exfiltración de datos sensibles (bases financieras). El atacante comprimió los archivos con 7zip y los envió vía HTTPS a un host externo no autorizado.",
-    "impact": "Pérdida de información crítica de finanzas y posible incumplimiento regulatorio.",
-  },
-  "notes_for_students": [
-    "Observar la secuencia: compresión local con 7zip → transferencia HTTPS → exfiltración completada.",
-    "Relacionar evidencias entre host, usuario y red para confirmar exfiltración.",
-    "Revisar tamaño, tipo de archivo y destino de transferencia como indicadores clave.",
-    "Analizar por qué HTTPS es usado como canal de exfiltración (difícil de inspeccionar sin TLS break).",
-    "Discutir medidas DLP y reglas de XDR para detectar transferencias de gran volumen fuera de horario laboral."
-  ]
+  }
 }
-
