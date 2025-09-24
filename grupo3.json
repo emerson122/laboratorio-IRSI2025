@@ -177,8 +177,6 @@
   ],
   "notes_for_students": [
     "Correlacionar procesos de ejecución remota (PsExec) con logs de seguridad (New Logon Type 3) y tráfico SMB.",
-    "Identificar el uso de credenciales robadas: actividad previa de lectura LSASS/credenciales seguida de PsExec.",
-    "Buscar presencia de herramientas (mimikatz) en temporales y comprobar hashes contra repositorios.",
-    "Discutir acciones inmediatas: rotación/revocación de credenciales, aislamiento de hosts y volcado LSASS autorizado para forense."
   ]
 }
+
