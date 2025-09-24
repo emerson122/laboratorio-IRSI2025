@@ -1,7 +1,6 @@
 {
   "Paquete 6": {
     "Titulo_de_alerta": "Actividad sospechosa post-exfil: intento de cifrado de archivos y modificación de Shadow Copies",
-    "Fase": "Exfiltration & Impact",
     "IP_atacante_C2": "198.24.79.245",
     "Hosts_afectados": [
       "FILESRV-03 (10.10.3.17)",
@@ -96,3 +95,4 @@
     }
   }
 }
+
