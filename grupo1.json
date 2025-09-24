@@ -223,7 +223,7 @@
   "notes_for_students": [
     "Correlacionar procesos, archivos y conexiones de red en base al mismo objeto: host SRV-ARCH-05 y usuario sromero.",
     "Fijarse en persistencia múltiple: Run key en HKCU, Servicio (SysUpdService) y Tarea programada.",
-    "Buscar actividad lateral o conexiones similares desde otros hosts hacia 5.153.180.37.",
-    "Verificar hashes y comparar con repositorios de malware (hashes incluidos)."
+    "determinar una serveridad  para  5.153.180.37.",
   ]
 }
+
