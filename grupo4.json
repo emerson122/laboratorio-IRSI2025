@@ -93,9 +93,7 @@
   "notes_for_students": [
     "Observar la secuencia: compresión local con 7zip → transferencia HTTPS → exfiltración completada.",
     "Relacionar evidencias entre host, usuario y red para confirmar exfiltración.",
-    "Revisar tamaño, tipo de archivo y destino de transferencia como indicadores clave.",
-    "Analizar por qué HTTPS es usado como canal de exfiltración (difícil de inspeccionar sin TLS break).",
-    "Discutir medidas DLP y reglas de XDR para detectar transferencias de gran volumen fuera de horario laboral."
   ]
 }
+
 
