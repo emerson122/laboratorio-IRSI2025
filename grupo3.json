@@ -1,0 +1,184 @@
+{
+  "case_name": "Propagation_PsExec_Mimikatz_WIN-SRV01",
+  "correlation_object": {
+    "host": "WIN-SRV01",
+    "host_ip": "10.10.1.9",
+    "user": "svc_backup@empresa.local"
+  },
+  "iocs": {
+    "c2_ip": "199.232.214.172",
+    "tools": [
+      "psexec.exe",
+      "mimikatz_tmp.exe"
+    ],
+    "targets": [
+      "10.10.3.17",
+      "10.10.10.5"
+    ],
+    "account": "svc_backup@empresa.local",
+    "file_paths": [
+      "C:\\Windows\\Temp\\mimikatz_tmp.exe"
+    ],
+    "hashes": {
+      "mimikatz_md5": "29efd64dd3c7fe1e2b022b7ad73a1ba5",
+      "mimikatz_sha256": "61c0810a23580cf492a6ba4f7654566108331e7a4134c968c2d6a05261b2d8a1"
+    }
+  },
+  "events": [
+    {
+      "event_id": "cred_theft_ldr_1",
+      "event_time_gmt-6": "2025-09-22T21:35:00-06:00",
+      "event_time_utc": "2025-09-23T03:35:00Z",
+      "source": "EDR",
+      "event_type": "CredentialLoad/LSASSAccess",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "details": {
+        "process": "powershell.exe",
+        "cmdline": "Invoke-TokenManipulation; Load-LSA -Target lsass",
+        "notes": "Proceso detectado accediendo memoria LSASS o cargando credenciales en memoria; posible robo de credenciales previo a lateralidad."
+      }
+    },
+    {
+      "event_id": "edr_psexec_exec_1",
+      "event_time_gmt-6": "2025-09-22T21:40:21-06:00",
+      "event_time_utc": "2025-09-23T03:40:21Z",
+      "source": "EDR",
+      "event_type": "ProcessCreate",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "process": {
+        "name": "psexec.exe",
+        "path": "C:\\Tools\\Sysinternals\\psexec.exe",
+        "pid": 8744,
+        "cmdline": "psexec \\\\10.10.3.17 -u DOMAIN\\svc_backup -p ******** cmd.exe",
+        "parent_process": {
+          "name": "cmd.exe",
+          "pid": 6600
+        }
+      },
+      "notes": "Ejecución remota hacia FILESRV-03 usando credenciales de la cuenta de servicio."
+    },
+    {
+      "event_id": "security_newlogon_1",
+      "event_time_gmt-6": "2025-09-22T21:40:25-06:00",
+      "event_time_utc": "2025-09-23T03:40:25Z",
+      "source": "Windows Security",
+      "event_type": "NewLogon (Type 3)",
+      "host": "FILESRV-03",
+      "host_ip": "10.10.3.17",
+      "user": "svc_backup@empresa.local",
+      "details": {
+        "logon_type": 3,
+        "workstation": "WIN-SRV01",
+        "account": "svc_backup",
+        "notes": "Logon de red (Type 3) asociado a ejecución remota desde WIN-SRV01."
+      }
+    },
+    {
+      "event_id": "file_write_mimikatz_1",
+      "event_time_gmt-6": "2025-09-22T21:42:10-06:00",
+      "event_time_utc": "2025-09-23T03:42:10Z",
+      "source": "EDR/FileMonitor",
+      "event_type": "FileCreate",
+      "host": "FILESRV-03",
+      "host_ip": "10.10.3.17",
+      "user": "svc_backup@empresa.local",
+      "file": {
+        "path": "C:\\Windows\\Temp\\mimikatz_tmp.exe",
+        "hashes": {
+          "mimikatz_md5": "29efd64dd3c7fe1e2b022b7ad73a1ba5",
+      "mimikatz_sha256": "61c0810a23580cf492a6ba4f7654566108331e7a4134c968c2d6a05261b2d8a1"
+        },
+        "notes": "Copia detectada en carpeta temporal tras ejecución remota."
+      }
+    },
+    {
+      "event_id": "smb_sessions_1",
+      "event_time_gmt-6": "2025-09-22T21:45:00-06:00",
+      "event_time_utc": "2025-09-23T03:45:00Z",
+      "source": "Network/Firewall",
+      "event_type": "SMBSession",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "network": {
+        "dst_ips": ["10.10.3.17", "10.10.10.5"],
+        "dst_ports": [445, 139],
+        "proto": "TCP",
+        "direction": "outbound",
+        "notes": "Sesiones SMB establecidas hacia FILESRV-03 y FINANCE-DB."
+      }
+    },
+    {
+      "event_id": "edr_psexec_exec_2",
+      "event_time_gmt-6": "2025-09-22T21:55:12-06:00",
+      "event_time_utc": "2025-09-23T03:55:12Z",
+      "source": "EDR",
+      "event_type": "ProcessCreate",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "process": {
+        "name": "psexec.exe",
+        "path": "C:\\Tools\\Sysinternals\\psexec.exe",
+        "pid": 9012,
+        "cmdline": "psexec \\\\10.10.10.5 -u DOMAIN\\svc_backup -p ******** cmd.exe",
+        "parent_process": {
+          "name": "cmd.exe",
+          "pid": 6601
+        }
+      },
+      "notes": "Ejecución remota hacia FINANCE-DB; patrón repetido de lateralidad."
+    },
+    {
+      "event_id": "network_c2_1",
+      "event_time_gmt-6": "2025-09-22T22:05:00-06:00",
+      "event_time_utc": "2025-09-23T04:05:00Z",
+      "source": "EDR/Network",
+      "event_type": "OutboundConnection",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "network": {
+        "dst_ip": "199.232.214.172",
+        "dst_port": 443,
+        "protocol": "TLS",
+        "direction": "outbound",
+        "notes": "Comunicación con C2 observada después de las acciones de propagación."
+      }
+    }
+  ],
+  "timeline_summary_gmt-6": [
+    {
+      "time": "2025-09-22T21:35:00-06:00",
+      "event": "Actividad de carga/lectura de credenciales en memoria detectada en WIN-SRV01 (posible robo de credenciales)."
+    },
+    {
+      "time": "2025-09-22T21:40:21-06:00",
+      "event": "PsExec ejecutado desde WIN-SRV01 hacia FILESRV-03 con credenciales de svc_backup."
+    },
+    {
+      "time": "2025-09-22T21:42:10-06:00",
+      "event": "Copia de mimikatz detectada en C:\\Windows\\Temp\\mimikatz_tmp.exe en FILESRV-03."
+    },
+    {
+      "time": "2025-09-22T21:45:00-06:00",
+      "event": "Sesiones SMB establecidas hacia FILESRV-03 y FINANCE-DB."
+    },
+    {
+      "time": "2025-09-22T21:55:12-06:00",
+      "event": "Ejecución remota hacia FINANCE-DB (10.10.10.5) mediante PsExec."
+    },
+    {
+      "time": "2025-09-22T22:05:00-06:00",
+      "event": "Conexión saliente detectada hacia C2 199.232.214.172."
+    }
+  ],
+  "notes_for_students": [
+    "Correlacionar procesos de ejecución remota (PsExec) con logs de seguridad (New Logon Type 3) y tráfico SMB.",
+    "Identificar el uso de credenciales robadas: actividad previa de lectura LSASS/credenciales seguida de PsExec.",
+    "Buscar presencia de herramientas (mimikatz) en temporales y comprobar hashes contra repositorios.",
+    "Discutir acciones inmediatas: rotación/revocación de credenciales, aislamiento de hosts y volcado LSASS autorizado para forense."
+  ]
+}
