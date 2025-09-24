@@ -1,0 +1,31 @@
+{
+  "case_name": "Exfiltracion_Datos_Financieros",
+  "fase": "Exfiltration & Impact",
+  "origen": {
+    "host": "FINANCE-DB",
+    "ip": "10.10.10.5",
+    "usuario": "dbadmin@empresa.local"
+  },
+  "destino": {
+    "ip": "85.206.172.132",
+    "dominio": "fileshare.upload"
+  },
+  "evento_principal": "Transferencia de ~2.2GB de datos comprimidos vía HTTPS",
+  "archivo_exfiltrado": "finance_2025-09-23.zip",
+  "herramienta_usada": "7zip.exe",
+  "timeline": [
+    "00:50 → Se crea el archivo ZIP con bases de datos (.csv y .sql).",
+    "01:12 → Inicia transferencia HTTPS hacia 85.206.172.132.",
+    "01:40 → Transferencia completada (~2.2GB)."
+  ],
+  "acciones_recomendadas": [
+    "Bloquear la IP destino inmediatamente.",
+    "Aislar el host FINANCE-DB.",
+    "Revisar qué datos salieron y notificar a cumplimiento."
+  ],
+  "notas_para_estudiantes": [
+    "Este es un ejemplo clásico de exfiltración: datos comprimidos + salida por HTTPS.",
+    "Fíjense cómo se correlacionan tres cosas: creación del archivo, transferencia de red y usuario implicado.",
+    "HTTPS puede usarse como canal de fuga porque parece 'tráfico normal'."
+  ]
+}
