@@ -89,25 +89,6 @@
   "analysis": {
     "summary": "Confirmada la exfiltración de datos sensibles (bases financieras). El atacante comprimió los archivos con 7zip y los envió vía HTTPS a un host externo no autorizado.",
     "impact": "Pérdida de información crítica de finanzas y posible incumplimiento regulatorio.",
-    "recommended_actions": {
-      "containment": [
-        "Bloquear 85.206.172.132 en el perímetro.",
-        "Interrumpir sesiones activas desde FINANCE-DB.",
-        "Aislar host FINANCE-DB."
-      ],
-      "remediation": [
-        "Identificar datos específicos exfiltrados.",
-        "Notificar cumplimiento/privacidad según normativas aplicables."
-      ],
-      "forensic": [
-        "Revisar copia local de finance_2025-09-23.zip.",
-        "Analizar logs de proxy y firewall para confirmar alcance."
-      ],
-      "communication": [
-        "Notificar internamente.",
-        "Elevar a dirección/legal si aplica reporte externo."
-      ]
-    }
   },
   "notes_for_students": [
     "Observar la secuencia: compresión local con 7zip → transferencia HTTPS → exfiltración completada.",
@@ -117,3 +98,4 @@
     "Discutir medidas DLP y reglas de XDR para detectar transferencias de gran volumen fuera de horario laboral."
   ]
 }
+
