@@ -1,0 +1,114 @@
+{
+  "case_name": "Exploration_LDAP_SMB_WINSRV01",
+  "correlation_object": {
+    "host": "WIN-SRV01",
+    "host_ip": "10.10.1.9",
+    "user": "svc_backup@empresa.local"
+  },
+  "iocs": {
+    "external_ip": "89.248.172.16",
+    "internal_host": "10.10.1.9",
+    "commands": [
+      "Get-ADComputer -Filter * -Properties *"
+    ],
+    "ports": [445, 139, 5985, 5986]
+  },
+  "events": [
+    {
+      "event_id": "fw_scan_smb",
+      "event_time_gmt-6": "2025-09-22T05:05:12-06:00",
+      "event_time_utc": "2025-09-22T11:05:12Z",
+      "source": "Firewall",
+      "event_type": "NetworkAllow",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "network": {
+        "src_ip": "10.10.1.9",
+        "dst_ip_range": "10.10.2.0/24",
+        "proto": "TCP",
+        "dst_port": 445,
+        "action": "ALLOW"
+      },
+      "notes": "Escaneo SMB contra segmento interno 10.10.2.0/24."
+    },
+    {
+      "event_id": "ldap_query_all_computers",
+      "event_time_gmt-6": "2025-09-22T05:07:03-06:00",
+      "event_time_utc": "2025-09-22T11:07:03Z",
+      "source": "Active Directory",
+      "event_type": "LDAPSearch",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "ldap": {
+        "base_dn": "DC=empresa,DC=local",
+        "filter": "(objectClass=computer)"
+      },
+      "notes": "Enumeración de equipos mediante consulta LDAP masiva."
+    },
+    {
+      "event_id": "edr_powershell_enum",
+      "event_time_gmt-6": "2025-09-22T05:07:45-06:00",
+      "event_time_utc": "2025-09-22T11:07:45Z",
+      "source": "EDR",
+      "event_type": "ProcessCreate",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "process": {
+        "name": "powershell.exe",
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "pid": 3920,
+        "cmdline": "powershell.exe Get-ADComputer -Filter * -Properties *",
+        "parent_process": {
+          "name": "services.exe",
+          "pid": 580
+        }
+      },
+      "notes": "Comando AD enumeration ejecutado con cuenta de servicio."
+    },
+    {
+      "event_id": "netflow_multiple_ports",
+      "event_time_gmt-6": "2025-09-22T05:10:00-06:00",
+      "event_time_utc": "2025-09-22T11:10:00Z",
+      "source": "Netflow",
+      "event_type": "NetworkScan",
+      "host": "WIN-SRV01",
+      "host_ip": "10.10.1.9",
+      "user": "svc_backup@empresa.local",
+      "network": {
+        "src_ip": "10.10.1.9",
+        "dst_subnets": ["10.10.2.0/24", "10.10.3.0/24"],
+        "dst_ports": [139, 445, 5985, 5986],
+        "proto": "TCP",
+        "connections": "multiple short-lived"
+      },
+      "notes": "Conexiones rápidas a SMB y WinRM en varios segmentos internos."
+    }
+  ],
+  "timeline_summary_gmt-6": [
+    {
+      "time": "2025-09-22T05:05:12-06:00",
+      "event": "Inicio de escaneo SMB hacia red interna (puerto 445)."
+    },
+    {
+      "time": "2025-09-22T05:07:03-06:00",
+      "event": "Consultas LDAP masivas desde 10.10.1.9 (usuario svc_backup)."
+    },
+    {
+      "time": "2025-09-22T05:07:45-06:00",
+      "event": "Powershell ejecutando Get-ADComputer para enumerar equipos en AD."
+    },
+    {
+      "time": "2025-09-22T05:10:00-06:00",
+      "event": "Intentos de conexión a shares SMB y WinRM en múltiples subredes internas."
+    }
+  ],
+  "notes_for_students": [
+    "Observar cómo un host interno comprometido puede comportarse como atacante.",
+    "Relacionar tráfico de red (Firewall/Netflow) con procesos (EDR).",
+    "Fijarse en la combinación de LDAP + SMB + WinRM como patrón de reconocimiento lateral.",
+    "Preguntarse: ¿este comportamiento es esperado para una cuenta de servicio limitada?"
+  ]
+}
