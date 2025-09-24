@@ -1,0 +1,229 @@
+{
+  "case_name": "Persistencia_SysUpdService_SRV-ARCH-05",
+  "correlation_object": {
+    "host": "SRV-ARCH-05",
+    "host_ip": "10.10.5.23",
+    "user": "sromero@empresa.local"
+  },
+  "iocs": {
+    "ip": "5.153.180.37",
+    "domain": "api.update-service[.]io",
+    "file_path": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+    "service": "SysUpdService",
+    "hashes": {
+      "md5": "3cfd36f2272eb9a2b2aec525bfb0ccc5",
+      "sha256": "a8527a88fb9a48f043a0b762c7431fb52e601b72ff2fa0d35327e5cc72404edc"
+    }
+  },
+  "events": [
+    {
+      "event_id": "proxy_download_1",
+      "event_time_gmt-6": "2025-09-19T17:58:12-06:00",
+      "event_time_utc": "2025-09-19T23:58:12Z",
+      "source": "Proxy",
+      "host": "SRV-ARCH-05",
+      "host_ip": "10.10.5.23",
+      "user": "sromero@empresa.local",
+      "details": {
+        "action": "HTTP GET",
+        "url": "http://update-service.io/download/sysupdate.exe",
+        "dst_ip": "5.153.180.37",
+        "status": 200,
+        "mime": "application/octet-stream",
+        "size_bytes": 188416
+      }
+    },
+    {
+      "event_id": "sysmon_process_create_1",
+      "event_time_gmt-6": "2025-09-19T22:12:03-06:00",
+      "event_time_utc": "2025-09-20T04:12:03Z",
+      "source": "Sysmon",
+      "event_type": "ProcessCreate (EventID 1)",
+      "host": "SRV-ARCH-05",
+      "host_ip": "10.10.5.23",
+      "user": "empresa\\sromero",
+      "process": {
+        "path": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+        "pid": 4576,
+        "cmdline": "sysupdate.exe --run",
+        "parent_process": {
+          "name": "explorer.exe",
+          "pid": 3240,
+          "path": "C:\\Windows\\explorer.exe"
+        }
+      },
+      "notes": "Ejecución desde perfil de usuario inmediatamente después de descarga proxy."
+    },
+    {
+      "event_id": "sysmon_file_create_1",
+      "event_time_gmt-6": "2025-09-19T22:12:04-06:00",
+      "event_time_utc": "2025-09-20T04:12:04Z",
+      "source": "Sysmon",
+      "event_type": "FileCreate (EventID 11)",
+      "host": "SRV-ARCH-05",
+      "file": {
+        "path": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+        "hashes": {
+          "md5": "e3b0c44298fc1c149afbf4c8996fb924",
+          "sha256": "2c26b46b68ffc68ff99b453c1d3041341343b2b1d..."
+        },
+        "owner": "empresa\\sromero"
+      }
+    },
+    {
+      "event_id": "sysmon_registry_run_1",
+      "event_time_gmt-6": "2025-09-19T22:12:06-06:00",
+      "event_time_utc": "2025-09-20T04:12:06Z",
+      "source": "Sysmon",
+      "event_type": "RegistryEvent (EventID 13)",
+      "host": "SRV-ARCH-05",
+      "user": "empresa\\sromero",
+      "registry": {
+        "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "value_name": "SysUpdate",
+        "value_data": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe"
+      },
+      "notes": "Persistencia vía Run en HKCU."
+    },
+    {
+      "event_id": "sysmon_service_create_1",
+      "event_time_gmt-6": "2025-09-19T22:12:10-06:00",
+      "event_time_utc": "2025-09-20T04:12:10Z",
+      "source": "Sysmon",
+      "event_type": "ServiceCreate (EventID 12)",
+      "host": "SRV-ARCH-05",
+      "service": {
+        "name": "SysUpdService",
+        "display_name": "Windows System Update",
+        "image_path": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+        "start_type": "Auto"
+      },
+      "notes": "Servicio creado apuntando al ejecutable en perfil de usuario."
+    },
+    {
+      "event_id": "sysmon_dns_1",
+      "event_time_gmt-6": "2025-09-19T22:15:42-06:00",
+      "event_time_utc": "2025-09-20T04:15:42Z",
+      "source": "Sysmon",
+      "event_type": "DNSQuery (EventID 22)",
+      "host": "SRV-ARCH-05",
+      "query": {
+        "name": "api.update-service.io",
+        "response_ip": "5.153.180.37"
+      }
+    },
+    {
+      "event_id": "taskscheduler_create_1",
+      "event_time_gmt-6": "2025-09-19T22:20:31-06:00",
+      "event_time_utc": "2025-09-20T04:20:31Z",
+      "source": "TaskScheduler",
+      "host": "SRV-ARCH-05",
+      "task": {
+        "task_name": "\\UserTasks\\SysUpdater",
+        "created_by": "empresa\\sromero",
+        "action": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+        "trigger": "AtLogon",
+        "run_level": "LeastPrivilege"
+      },
+      "notes": "Tarea programada creada para persistencia adicional."
+    },
+    {
+      "event_id": "edr_netconn_1",
+      "event_time_gmt-6": "2025-09-20T20:00:00-06:00",
+      "event_time_utc": "2025-09-21T02:00:00Z",
+      "source": "EDR",
+      "event_type": "NetworkConnect",
+      "host": "SRV-ARCH-05",
+      "process": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+      "pid": 5108,
+      "network": {
+        "src_ip": "10.10.5.23",
+        "dst_ip": "5.153.180.37",
+        "dst_port": 443,
+        "protocol": "TLS",
+        "sni": "api.update-service.io",
+        "direction": "outbound"
+      },
+      "notes": "Beacon inicial C2 establecido."
+    },
+    {
+      "event_id": "edr_netconn_2",
+      "event_time_gmt-6": "2025-09-20T20:05:00-06:00",
+      "event_time_utc": "2025-09-21T02:05:00Z",
+      "source": "EDR",
+      "event_type": "NetworkConnect",
+      "host": "SRV-ARCH-05",
+      "process": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+      "pid": 5108,
+      "network": {
+        "src_ip": "10.10.5.23",
+        "dst_ip": "5.153.180.37",
+        "dst_port": 443,
+        "protocol": "TLS",
+        "sni": "api.update-service.io",
+        "beacon_interval_seconds": 300
+      },
+      "notes": "Beacon periódico (intervalo 300s)."
+    },
+    {
+      "event_id": "security_privilege_escalation_1",
+      "event_time_gmt-6": "2025-09-20T20:11:14-06:00",
+      "event_time_utc": "2025-09-21T02:11:14Z",
+      "source": "Windows Security",
+      "event_type": "SpecialPrivilegesAssigned (EventID 4672)",
+      "host": "SRV-ARCH-05",
+      "user": "empresa\\sromero",
+      "privileges": [
+        "SeDebugPrivilege",
+        "SeLoadDriverPrivilege"
+      ],
+      "notes": "Asignación de privilegios especiales detectada tras persistencia."
+    },
+    {
+      "event_id": "edr_netconn_3",
+      "event_time_gmt-6": "2025-09-20T20:10:00-06:00",
+      "event_time_utc": "2025-09-21T02:10:00Z",
+      "source": "EDR",
+      "event_type": "NetworkConnect",
+      "host": "SRV-ARCH-05",
+      "process": "C:\\Users\\sromero\\AppData\\Roaming\\sysupdate.exe",
+      "pid": 5108,
+      "network": {
+        "src_ip": "10.10.5.23",
+        "dst_ip": "5.153.180.37",
+        "dst_port": 443,
+        "protocol": "TLS",
+        "sni": "api.update-service.io",
+        "beacon_interval_seconds": 300
+      }
+    }
+  ],
+  "timeline_summary_gmt-6": [
+    {
+      "time": "2025-09-19T17:58:12-06:00",
+      "event": "Descarga inicial detectada por proxy desde api.update-service.io (5.153.180.37)."
+    },
+    {
+      "time": "2025-09-19T22:12:03-06:00",
+      "event": "Ejecutable escrito y ejecutado desde perfil de usuario; creación de servicio y Run key."
+    },
+    {
+      "time": "2025-09-19T22:20:31-06:00",
+      "event": "Creación de tarea programada \\UserTasks\\SysUpdater (AtLogon)."
+    },
+    {
+      "time": "2025-09-20T20:00:00-06:00",
+      "event": "Primer beacon C2 observado hacia 5.153.180.37:443 (SNI api.update-service.io)."
+    },
+    {
+      "time": "2025-09-20T20:11:14-06:00",
+      "event": "Asignación de privilegios especiales a usuario interno (SeDebugPrivilege, SeLoadDriverPrivilege)."
+    }
+  ],
+  "notes_for_students": [
+    "Correlacionar procesos, archivos y conexiones de red en base al mismo objeto: host SRV-ARCH-05 y usuario sromero.",
+    "Fijarse en persistencia múltiple: Run key en HKCU, Servicio (SysUpdService) y Tarea programada.",
+    "Buscar actividad lateral o conexiones similares desde otros hosts hacia 5.153.180.37.",
+    "Verificar hashes y comparar con repositorios de malware (hashes incluidos)."
+  ]
+}
