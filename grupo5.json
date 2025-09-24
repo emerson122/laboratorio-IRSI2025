@@ -1,0 +1,119 @@
+{
+  "case_name": "Exfiltration_MassiveTransfer_FINANCE_DB",
+  "correlation_object": {
+    "phase": "Exfiltration & Impact",
+    "origin_host": "FINANCE-DB",
+    "origin_ip": "10.10.10.5",
+    "user": "dbadmin@empresa.local",
+    "session_source_ip": "10.10.1.9"
+  },
+  "iocs": {
+    "dst_ip": "85.206.172.132",
+    "dst_domain": "fileshare.upload",
+    "tools": [
+      "7zip.exe"
+    ],
+    "files": [
+      "C:\\Backups\\finance_2025-09-23.zip"
+    ],
+    "file_types": [
+      ".csv",
+      ".sql",
+      ".zip"
+    ]
+  },
+  "events": [
+    {
+      "event_id": "edr_file_zip_1",
+      "event_time_utc": "2025-09-24T00:50:00Z",
+      "source": "EDR",
+      "event_type": "ProcessCreate",
+      "host": "FINANCE-DB",
+      "host_ip": "10.10.10.5",
+      "user": "dbadmin@empresa.local",
+      "process": {
+        "name": "7zip.exe",
+        "cmdline": "7zip a C:\\Backups\\finance_2025-09-23.zip *.sql *.csv"
+      },
+      "notes": "Compresión de múltiples ficheros financieros en un solo archivo ZIP de gran tamaño."
+    },
+    {
+      "event_id": "proxy_https_exfil_1",
+      "event_time_utc": "2025-09-24T01:12:10Z",
+      "source": "Proxy",
+      "event_type": "OutboundHTTPS",
+      "host": "FINANCE-DB",
+      "host_ip": "10.10.10.5",
+      "user": "dbadmin@empresa.local",
+      "network": {
+        "dst_ip": "85.206.172.132",
+        "dst_port": 443,
+        "protocol": "TLS",
+        "bytes_sent": 2400000,
+        "sni": "fileshare.upload",
+        "host_header": "fileshare.upload"
+      },
+      "notes": "Transferencia inicial de archivo comprimido detectada hacia host externo desconocido."
+    },
+    {
+      "event_id": "network_flow_1",
+      "event_time_utc": "2025-09-24T01:40:00Z",
+      "source": "Firewall",
+      "event_type": "DataTransfer",
+      "host": "FINANCE-DB",
+      "host_ip": "10.10.10.5",
+      "user": "dbadmin@empresa.local",
+      "network": {
+        "dst_ip": "85.206.172.132",
+        "protocol": "TLS",
+        "duration": "28m",
+        "bytes_sent": 2200000000
+      },
+      "notes": "Transferencia completada ~2.2GB de datos financieros sensibles."
+    }
+  ],
+  "timeline_summary": [
+    {
+      "time": "2025-09-24T00:50:00Z",
+      "event": "Compresión de backups en finance_2025-09-23.zip."
+    },
+    {
+      "time": "2025-09-24T01:12:10Z",
+      "event": "Transferencia HTTPS iniciada desde FINANCE-DB hacia 85.206.172.132."
+    },
+    {
+      "time": "2025-09-24T01:40:00Z",
+      "event": "Exfiltración completa (~2.2GB) confirmada."
+    }
+  ],
+  "analysis": {
+    "summary": "Confirmada la exfiltración de datos sensibles (bases financieras). El atacante comprimió los archivos con 7zip y los envió vía HTTPS a un host externo no autorizado.",
+    "impact": "Pérdida de información crítica de finanzas y posible incumplimiento regulatorio.",
+    "recommended_actions": {
+      "containment": [
+        "Bloquear 85.206.172.132 en el perímetro.",
+        "Interrumpir sesiones activas desde FINANCE-DB.",
+        "Aislar host FINANCE-DB."
+      ],
+      "remediation": [
+        "Identificar datos específicos exfiltrados.",
+        "Notificar cumplimiento/privacidad según normativas aplicables."
+      ],
+      "forensic": [
+        "Revisar copia local de finance_2025-09-23.zip.",
+        "Analizar logs de proxy y firewall para confirmar alcance."
+      ],
+      "communication": [
+        "Notificar internamente.",
+        "Elevar a dirección/legal si aplica reporte externo."
+      ]
+    }
+  },
+  "notes_for_students": [
+    "Observar la secuencia: compresión local con 7zip → transferencia HTTPS → exfiltración completada.",
+    "Relacionar evidencias entre host, usuario y red para confirmar exfiltración.",
+    "Revisar tamaño, tipo de archivo y destino de transferencia como indicadores clave.",
+    "Analizar por qué HTTPS es usado como canal de exfiltración (difícil de inspeccionar sin TLS break).",
+    "Discutir medidas DLP y reglas de XDR para detectar transferencias de gran volumen fuera de horario laboral."
+  ]
+}
