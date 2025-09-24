@@ -7,7 +7,7 @@
       "USER-DEV-21 (10.10.21.77)"
     ],
     "Usuario_implicado": "local admin (movida lateral con privilegios elevados)",
-    "Resumen": "Tras la fase de exfiltración, se detecta actividad que corresponde a la fase de impacto: eliminación de mecanismos de recuperación (shadow copies), ejecución de cifrado masivo de archivos, modificación de extensiones, y creación de notas de rescate en sistemas comprometidos. Además, se observan conexiones de mando y control activas hacia un servidor externo en 198.24.79.245 sobre puerto no estándar (4444).",
+    "Resumen": "se detecta actividad que corresponde a la fase de impacto: eliminación de mecanismos de recuperación (shadow copies), ejecución de cifrado masivo de archivos, modificación de extensiones, y creación de notas de rescate en sistemas comprometidos. Además, se observan conexiones de mando y control activas hacia un servidor externo en 198.24.79.245 sobre puerto no estándar (4444).",
     "Evidencia": {
       "EDR_ProcessCreate": [
         "2025-09-24T03:50:10Z - ProcessCreate - C:\\Windows\\System32\\cmd.exe /c vssadmin delete shadows /all /quiet",
@@ -92,7 +92,9 @@
         "encryptor.exe": "sha256:7f3a2d5f2a49e0192e8cf7f6ac10d921eaf12bb7f03c8e8d4c8b482ff56a9d21",
         "README_RECOVER.txt": "sha256:98a7b31c21cd19db8adf2209f7ce233ba2f8946c9cbd773a09c89472118de888"
       }
-    }
-  }
-}
-
+    },
+    "Notas_para_estudiantes": [
+      "Observen cómo la actividad de cifrado masivo y eliminación de shadow copies corresponde a la fase",
+      "Correlacionen los procesos detectados (cmd.exe, wbadmin, encryptor.exe) con los cambios en archivos y extensiones.",
+      "Analicen la línea temporal para entender la secuencia de eventos: lateralidad, ejecución de comandos, modificación de ficheros, comunicación con C2.",
+      "Identifiquen patrones de persistencia como tareas programadas y cambios en el registro.",
