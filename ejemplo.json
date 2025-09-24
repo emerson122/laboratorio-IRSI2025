@@ -1,31 +1,63 @@
 {
-  "case_name": "Exfiltracion_Datos_Financieros",
-  "fase": "Exfiltration & Impact",
-  "origen": {
-    "host": "FINANCE-DB",
-    "ip": "10.10.10.5",
-    "usuario": "dbadmin@empresa.local"
-  },
-  "destino": {
-    "ip": "85.206.172.132",
-    "dominio": "fileshare.upload"
-  },
-  "evento_principal": "Transferencia de ~2.2GB de datos comprimidos vía HTTPS",
-  "archivo_exfiltrado": "finance_2025-09-23.zip",
-  "herramienta_usada": "7zip.exe",
-  "timeline": [
-    "00:50 → Se crea el archivo ZIP con bases de datos (.csv y .sql).",
-    "01:12 → Inicia transferencia HTTPS hacia 85.206.172.132.",
-    "01:40 → Transferencia completada (~2.2GB)."
-  ],
-  "acciones_recomendadas": [
-    "Bloquear la IP destino inmediatamente.",
-    "Aislar el host FINANCE-DB.",
-    "Revisar qué datos salieron y notificar a cumplimiento."
-  ],
-  "notas_para_estudiantes": [
-    "Este es un ejemplo clásico de exfiltración: datos comprimidos + salida por HTTPS.",
-    "Fíjense cómo se correlacionan tres cosas: creación del archivo, transferencia de red y usuario implicado.",
-    "HTTPS puede usarse como canal de fuga porque parece 'tráfico normal'."
-  ]
+  "Paquete 1 — Ejemplo del profesor": {
+    "Titulo_de_alerta": "Intentos de acceso fallidos masivos desde IP externa",
+    "Fase": "Initial Attempts",
+    "IP_atacante": "194.165.16.11",
+    "Host_objetivo": "WIN-LAPTOP-12 (10.10.12.45)",
+    "Usuario_interno": "mgarcia@empresa.local",
+    "Resumen": "Múltiples intentos de autenticación contra RDP/WinRM y servicios web internos desde la IP atacante durante un corto periodo; además DNS requests raros.",
+    "Evidencia": {
+      "Windows_Security": [
+        "2025-09-23T21:00:12Z - 4625 - Account: mgarcia - Source IP: 194.165.16.11 - Failure Reason: Unknown user name or bad password",
+        "2025-09-23T21:00:45Z - 4625 - Account: mgarcia - Source IP: 194.165.16.11 - Failure Reason: Account locked out"
+      ],
+      "VPN_Firewall": [
+        "2025-09-23T20:59:57Z - FW - DROP - src=194.165.16.11 dst=10.10.12.45 proto=TCP dport=3389"
+      ],
+      "Proxy_Web_Gateway": [
+        "2025-09-23T20:58:02Z - HTTP GET - host: auth.empresa.local/login - src: 194.165.16.11 - UA: python-requests/2.25"
+      ],
+      "DNS_logs": [
+        "2025-09-23T20:57:55Z - query: randomabc123.maldomain[.]top -> 194.165.16.11 (consulta sospechosa registrada por el resolver interno)"
+      ],
+      "Threat_Intel": "IP 194.165.16.11 aparece en listas de escaneo/portscan los últimos 30 días"
+    },
+    "Timeline": [
+      "20:57:55 — DNS query inusual desde la red",
+      "20:58:02 — HTTP probe al endpoint de login",
+      "20:59:57–21:02:00 — múltiples intentos RDP/WinRM contra WIN-LAPTOP-12",
+      "21:03:15 — bloqueo de cuenta por políticas de AD"
+    ],
+    "Analisis": "Los eventos muestran reconocimiento y fuerza bruta/credential stuffing: múltiples fallos de login, probes HTTP automatizados y DNS dinámico. No hay pruebas de ejecución local todavía, por eso fase Initial Attempts.",
+    "Acciones_recomendadas": {
+      "Contencion": [
+        "Bloquear 194.165.16.11 en el firewall y proxy",
+        "Forzar reset de contraseña de mgarcia",
+        "Deshabilitar sesiones activas del usuario si existen"
+      ],
+      "Investigacion": [
+        "Revisar otros hosts con fallos provenientes de la misma IP o patrones similares"
+      ],
+      "Remediacion": [
+        "Revisar logs de VPN/edge",
+        "Desplegar regla IPS para detectar intentos RDP desde IPs externas"
+      ],
+      "Recuperacion": [
+        "Restablecer credenciales",
+        "Revisar y habilitar MFA en la cuenta de mgarcia"
+      ]
+    },
+    "StellarCyber_queries": {
+      "Interflow_TopAlerts": "filtrar por src_ip=194.165.16.11 y event_type=auth_failed",
+      "Correlations": "crear correlación >5 fallos RDP en 10 min desde IP externa",
+      "Threat_Intel": "añadir la IP a lista de IOCs y marcar como maliciosa",
+      "Case_Management": "abrir caso 'InitialAttempts_194.165.16.11_mgarcia' y adjuntar eventos"
+    },
+    "IOCs": {
+      "IP": "194.165.16.11",
+      "DNS": "randomabc123.maldomain.top",
+      "UserAgent": "python-requests/2.25",
+      "Usuario_objetivo": "mgarcia@empresa.local"
+    }
+  }
 }
