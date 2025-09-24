@@ -107,8 +107,8 @@
   ],
   "notes_for_students": [
     "Observar cómo un host interno comprometido puede comportarse como atacante.",
-    "Relacionar tráfico de red (Firewall/Netflow) con procesos (EDR).",
     "Fijarse en la combinación de LDAP + SMB + WinRM como patrón de reconocimiento lateral.",
     "Preguntarse: ¿este comportamiento es esperado para una cuenta de servicio limitada?"
   ]
 }
+
