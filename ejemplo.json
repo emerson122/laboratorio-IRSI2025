@@ -1,5 +1,5 @@
 {
-  "Paquete 1 — Ejemplo del profesor": {
+  "Paquete 1 — Ejemplo": {
     "Titulo_de_alerta": "Intentos de acceso fallidos masivos desde IP externa",
     "Fase": "Initial Attempts",
     "IP_atacante": "194.165.16.11",
@@ -61,3 +61,4 @@
     }
   }
 }
+
