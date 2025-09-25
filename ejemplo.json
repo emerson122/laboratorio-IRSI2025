@@ -39,15 +39,11 @@
         Deshabilitar sesiones activas del usuario si existen
 
       Investigacion
-        Revisar otros hosts con fallos provenientes de la misma IP o patrones similares
-
-      Remediacion
-        Revisar logs de VPN/edge
-        Desplegar regla IPS para detectar intentos RDP desde IPs externas
+        Revisar otros hosts con fallos provenientes de la misma IP o patrones similares en otros equipos
       
       Recuperacion
         Restablecer credenciales
-        Revisar y habilitar MFA en la cuenta de mgarcia"
+        Revisar y habilitar MFA en la cuenta de mgarcia
 
 
     "IOCs": {
@@ -58,5 +54,6 @@
     }
   }
 }
+
 
 
